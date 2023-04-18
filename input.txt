@@ -1,0 +1,2 @@
+var1  :=T and (var2 xor F) or not ((F));
+var2 := T xor F;
