@@ -27,14 +27,14 @@ public class PredefinedTokens {
         if (!predefinedTokens.containsKey("operators")
                 || !predefinedTokens.containsKey("constants")
                 || !predefinedTokens.containsKey("keywords")
-                || !predefinedTokens.containsKey("regexes")) {
+                || !predefinedTokens.containsKey("regex_splitters")) {
             throw new RuntimeException();
         }
 
         operators = (Map<String, String>)predefinedTokens.get("operators");
         constants = (Map<String, String>)predefinedTokens.get("constants");
         keywords = (Map<String, String>)predefinedTokens.get("keywords");
-        delimiter = String.join("|", (ArrayList<String>)predefinedTokens.get("regexes"));
+        delimiter = String.join("|", (ArrayList<String>)predefinedTokens.get("regex_delimiters"));
     }
 
     public Map<String, String> getOperators() {

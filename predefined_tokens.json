@@ -15,10 +15,25 @@
     "T" : "C1",
     "F" : "C2"
   },
-  "regexes" : [
+  "identifier_rules" : {
+    "max_length" : 16,
+    "regex" : "[a-zA-Z]+\\d*[a-zA-Z]*"
+  },
+  "comments_sym" : [
+    "//",
+    "%"
+  ],
+  "regex_delimiters" : [
     "(?=:=)|(?<=:=)",
     "(?=;)|(?<=;)",
     "(?=\\()|(?<=\\()",
     "(?=\\))|(?<=\\))"
-  ]
+  ],
+  "aliases" : {
+    "operators" : "Оператор",
+    "keywords" : "Ключевое слово",
+    "constants" : "Константа",
+    "identifiers" : "Идентификатор",
+    "comment" : "Комментарий"
+  }
 }
