@@ -65,8 +65,8 @@ public class ConfigHandler {
         return (String) identifierRules.get("mark");
     }
 
-    public String[] getCommentChars() {
-        return (String[]) predefinedTokens.get("comment_chars");
+    public ArrayList<String> getCommentChars() {
+        return (ArrayList<String>) predefinedTokens.get("comment_chars");
     }
 
     public Map<String, String> getAliases() {

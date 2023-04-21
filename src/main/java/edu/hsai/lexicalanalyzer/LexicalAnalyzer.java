@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import edu.hsai.lexicalanalyzer.filehandler.FileHandler;
-import edu.hsai.lexicalanalyzer.configHandler.*;
+import edu.hsai.lexicalanalyzer.confighandler.*;
 
 public class LexicalAnalyzer {
     private final Map<String, String> operators;
@@ -18,6 +18,7 @@ public class LexicalAnalyzer {
     private final String identifierRegex;
     private final int identifierMaxLength;
     private final String identifierMark;
+    private final ArrayList<String> commentChars;
 
     private final String[] lines;
     private Map<Integer, String[]> tokenizedLines = new HashMap<>();
@@ -36,6 +37,7 @@ public class LexicalAnalyzer {
         identifierRegex = config.getIdentifierRegex();
         identifierMaxLength = (int)config.getIdentifierMaxLength();
         identifierMark = config.getIdentifierMark();
+        commentChars = config.getCommentChars();
 
         analyze();
     }
@@ -43,16 +45,25 @@ public class LexicalAnalyzer {
     private void analyze() {
         tokenizeLines();
         markLines();
-        System.out.println("hi!");
+        System.out.println("hi! I'm lazily debugging here!");
     }
 
     private void tokenizeLines() {
-        // TODO: ignore comments!
         for (int i = 0; i < lines.length; i++) {
-            tokenizedLines.put(i + 1, Stream.of(lines[i])
-                    .flatMap(line -> Stream.of(line.split("\\s+")))
-                    .flatMap(tokens -> Stream.of(tokens.split(lineDelimiter)))
-                    .toArray(String[]::new));
+            boolean isComment = false;
+            for (String commentStr: commentChars) {
+                if (lines[i].startsWith(commentStr)) {
+                    isComment = true;
+                    break;
+                }
+            }
+
+            if (!isComment) {
+                tokenizedLines.put(i + 1, Stream.of(lines[i])
+                        .flatMap(line -> Stream.of(line.split("\\s+")))
+                        .flatMap(tokens -> Stream.of(tokens.split(lineDelimiter)))
+                        .toArray(String[]::new));
+            }
         }
     }
 
