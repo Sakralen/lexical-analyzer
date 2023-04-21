@@ -1,79 +1,88 @@
 package edu.hsai.lexicalanalyzer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import edu.hsai.lexicalanalyzer.inputhandler.FileInputHandler;
-import edu.hsai.lexicalanalyzer.predefinedtokens.*;
+import edu.hsai.lexicalanalyzer.filehandler.FileHandler;
+import edu.hsai.lexicalanalyzer.configHandler.*;
 
 public class LexicalAnalyzer {
-    public static void main(String[] args) {
-        String inputFile = "input.txt";
-        String inputJson = "predefined_tokens.json";
+    private final Map<String, String> operators;
+    private final Map<String, String> keywords;
+    private final Map<String, String> constants;
+    private Map<String, String> identifiers = new HashMap<>();
 
-        if (args.length > 0) {
-            inputFile = args[0];
-            if (args.length > 1) {
-                inputJson = args[1];
-            }
-        }
+    private final String lineDelimiter;
+    private final String identifierRegex;
+    private final int identifierMaxLength;
+    private final String identifierMark;
 
-        String[] lines = FileInputHandler.readLines(inputFile);
-        PredefinedTokens predefined = new PredefinedTokens(inputJson);
-        Map<String, String> identifiers = new HashMap<>();
+    private final String[] lines;
+    private Map<Integer, String[]> tokenizedLines = new HashMap<>();
+    private Map<Integer, String[]> markedLines = new HashMap<>();
 
-        // Splitting tokens by whitespaces and operators
-        Map<Integer, String[]> tokensByLine = new HashMap<>();
+    private ArrayList<String> usedTokens;
+
+    public LexicalAnalyzer(String pathToFile, String pathToJson) {
+        lines = FileHandler.readLines(pathToFile);
+
+        ConfigHandler config = new ConfigHandler(pathToJson);
+        operators = config.getOperators();
+        keywords = config.getKeywords();
+        constants = config.getConstants();
+        lineDelimiter = config.getRegexDelimiter();
+        identifierRegex = config.getIdentifierRegex();
+        identifierMaxLength = (int)config.getIdentifierMaxLength();
+        identifierMark = config.getIdentifierMark();
+
+        analyze();
+    }
+
+    private void analyze() {
+        tokenizeLines();
+        markLines();
+        System.out.println("hi!");
+    }
+
+    private void tokenizeLines() {
+        // TODO: ignore comments!
         for (int i = 0; i < lines.length; i++) {
-            tokensByLine.put(i + 1, Stream.of(lines[i])
+            tokenizedLines.put(i + 1, Stream.of(lines[i])
                     .flatMap(line -> Stream.of(line.split("\\s+")))
-                    .flatMap(tokens -> Stream.of(tokens.split(predefined.getDelimiter())))
+                    .flatMap(tokens -> Stream.of(tokens.split(lineDelimiter)))
                     .toArray(String[]::new));
         }
+    }
 
-        // Replacing tokens with marks and adding used tokens to an array
-        Map<Integer, String[]> tokensMarked = new HashMap<>();
-        ArrayList<String> usedTokens = new ArrayList<>();
-        tokensByLine.forEach((k, v) -> tokensMarked.put(k, Stream.of(v).map(token -> {
-            if (!usedTokens.contains(token)) {
-                usedTokens.add(token);
+    private void markLines() {
+        tokenizedLines.forEach((k, v) -> markedLines.put(k, Stream.of(v).map(token -> {
+            // TODO: put tokens in used!
+            if (operators.containsKey(token)) {
+                return operators.get(token);
             }
-
-            if (predefined.getOperators().containsKey(token)) {
-                return predefined.getOperators().get(token);
+            if (keywords.containsKey(token)) {
+                return keywords.get(token);
             }
-            if (predefined.getKeywords().containsKey(token)) {
-                return predefined.getKeywords().get(token);
-            }
-            if (predefined.getConstants().containsKey(token)) {
-                return predefined.getConstants().get(token);
+            if (constants.containsKey(token)) {
+                return constants.get(token);
             }
 
-            // TODO: check identifier
             if (!identifiers.containsKey(token)) {
-                identifiers.put(token, "I" + (identifiers.size() + 1));
+                if (isIdentifierValid(token)) {
+                    identifiers.put(token, identifierMark + (identifiers.size() + 1));
+                } else {
+                    // TODO: state this error in results!
+                    throw new RuntimeException();
+                }
             }
             return identifiers.get(token);
         }).toArray(String[]::new)));
+    }
 
-        Arrays.stream(lines).sequential().forEach(System.out::println);
-        System.out.println();
-
-        tokensByLine.forEach((k, v) -> {
-            System.out.print(k + ": ");
-            System.out.println(Arrays.toString(v));
-        });
-        System.out.println();
-
-        tokensMarked.forEach((k, v) -> {
-            System.out.print(k + ": ");
-            System.out.println(Arrays.toString(v));
-        });
-        System.out.println();
-
-        System.out.println("used: " + usedTokens);
+    private boolean isIdentifierValid(String identifier) {
+        return (identifier.length() <= identifierMaxLength)
+                && identifier.matches(identifierRegex);
     }
 }

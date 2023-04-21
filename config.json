@@ -16,10 +16,11 @@
     "F" : "C2"
   },
   "identifier_rules" : {
+    "mark" : "I",
     "max_length" : 16,
     "regex" : "[a-zA-Z]+\\d*[a-zA-Z]*"
   },
-  "comments_sym" : [
+  "comment_chars" : [
     "//",
     "%"
   ],

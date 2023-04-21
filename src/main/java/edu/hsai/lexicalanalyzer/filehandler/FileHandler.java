@@ -1,12 +1,10 @@
-package edu.hsai.lexicalanalyzer.inputhandler;
+package edu.hsai.lexicalanalyzer.filehandler;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-public class FileInputHandler {
+public class FileHandler {
     public static String[] readLines(String path) {
         String[] lines = null;
         try {
