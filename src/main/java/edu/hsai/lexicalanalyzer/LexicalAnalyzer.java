@@ -6,24 +6,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import edu.hsai.lexicalanalyzer.filehandler.FileHandler;
-import edu.hsai.lexicalanalyzer.confighandler.*;
+import edu.hsai.lexicalanalyzer.config.*;
 import edu.hsai.lexicalanalyzer.outputtable.OutputTable;
 
 public class LexicalAnalyzer {
-    // TODO: migrate final fields to a subclass
-    private final Map<String, String> operators;
-    private final Map<String, String> keywords;
-    private final Map<String, String> constants;
+    private final Config cfg;
     private Map<String, String> identifiers = new HashMap<>();
     private Map<String, String> invalidIdentifiers = new HashMap<>();
-
-    private final String lineDelimiter;
-    private final String identifierRegex;
-    private final int identifierMaxLength;
-    private final String identifierMark;
-    private final ArrayList<String> commentChars;
-    private final Map<String, String> aliases;
-
     private final String[] lines;
     private Map<Integer, String[]> tokenizedLines = new HashMap<>();
     private Map<Integer, String[]> markedLines = new HashMap<>();
@@ -33,17 +22,7 @@ public class LexicalAnalyzer {
 
     public LexicalAnalyzer(String pathToFile, String pathToJson) {
         lines = FileHandler.readLines(pathToFile);
-
-        ConfigHandler config = new ConfigHandler(pathToJson);
-        operators = config.getOperators();
-        keywords = config.getKeywords();
-        constants = config.getConstants();
-        lineDelimiter = config.getRegexDelimiter();
-        identifierRegex = config.getIdentifierRegex();
-        identifierMaxLength = (int)config.getIdentifierMaxLength();
-        identifierMark = config.getIdentifierMark();
-        commentChars = config.getCommentChars();
-        aliases = config.getAliases();
+        cfg = new Config(pathToJson);
 
         tokenizeLines();
         analyze();
@@ -52,7 +31,7 @@ public class LexicalAnalyzer {
     private void tokenizeLines() {
         for (int i = 0; i < lines.length; i++) {
             boolean isComment = false;
-            for (String commentStr: commentChars) {
+            for (String commentStr: cfg.commentChars) {
                 if (lines[i].startsWith(commentStr)) {
                     commentedLines.put(i + 1, lines[i]);
                     isComment = true;
@@ -63,7 +42,7 @@ public class LexicalAnalyzer {
             if (!isComment) {
                 tokenizedLines.put(i + 1, Stream.of(lines[i])
                         .flatMap(line -> Stream.of(line.split("\\s+")))
-                        .flatMap(tokens -> Stream.of(tokens.split(lineDelimiter)))
+                        .flatMap(tokens -> Stream.of(tokens.split(cfg.lineDelimiter)))
                         .toArray(String[]::new));
             }
         }
@@ -75,42 +54,40 @@ public class LexicalAnalyzer {
                 return;
             }
 
-            if (operators.containsKey(token)) {
-                results.put(token, aliases.get("operators"), operators.get(token));
+            if (cfg.operators.containsKey(token)) {
+                results.put(token, cfg.aliases.get("operators"), cfg.operators.get(token));
                 return;
             }
-            if (keywords.containsKey(token)) {
-                results.put(token, aliases.get("keywords"), keywords.get(token));
+            if (cfg.keywords.containsKey(token)) {
+                results.put(token, cfg.aliases.get("keywords"), cfg.keywords.get(token));
                 return;
             }
-            if (constants.containsKey(token)) {
-                results.put(token, aliases.get("constants"), constants.get(token));
+            if (cfg.constants.containsKey(token)) {
+                results.put(token, cfg.aliases.get("constants"), cfg.constants.get(token));
                 return;
             }
             if (identifiers.containsKey(token)) {
-                results.put(token, aliases.get("identifiers"), identifiers.get(token));
+                results.put(token, cfg.aliases.get("identifiers"), identifiers.get(token));
                 return;
             }
             if (invalidIdentifiers.containsKey(token)) {
-                // TODO: put in cfg
-                results.put(token, "Invalid identifier", invalidIdentifiers.get(token));
+                results.put(token, cfg.aliases.get("invalid"), invalidIdentifiers.get(token));
                 return;
             }
 
             if (isIdentifierValid(token)) {
-                identifiers.put(token, identifierMark + (identifiers.size() + 1));
-                results.put(token, aliases.get("identifiers"), identifiers.get(token));
+                identifiers.put(token, cfg.identifierMark + (identifiers.size() + 1));
+                results.put(token, cfg.aliases.get("identifiers"), identifiers.get(token));
             } else {
-                // TODO: put in cfg
-                invalidIdentifiers.put(token, "E" + (invalidIdentifiers.size() + 1));
-                results.put(token, "Invalid identifier", invalidIdentifiers.get(token));
+                invalidIdentifiers.put(token, cfg.invalidMark + (invalidIdentifiers.size() + 1));
+                results.put(token, cfg.aliases.get("invalid"), invalidIdentifiers.get(token));
             }
         }));
     }
 
     private boolean isIdentifierValid(String identifier) {
-        return (identifier.length() <= identifierMaxLength)
-                && identifier.matches(identifierRegex);
+        return (identifier.length() <= cfg.identifierMaxLength)
+                && identifier.matches(cfg.identifierRegex);
     }
 
     public OutputTable getResults() {
