@@ -30,6 +30,10 @@ public class LexicalAnalyzer {
 
     private void tokenizeLines() {
         for (int i = 0; i < lines.length; i++) {
+            if (lines[i].isEmpty()) {
+                continue;
+            }
+
             boolean isComment = false;
             for (String commentStr: cfg.commentChars) {
                 if (lines[i].startsWith(commentStr)) {
