@@ -1,4 +1,7 @@
-var1  :=T and НЕЛЕГАЛЬНЫЙИДЕНТИФИКАТОР(var2 xor F) or not ((F));
+var1  :=T and ILLEGALIDENTIFIER(var2 xor F) or not ((F));
+var3 xor var1 //A comment here?! and var4
 %Это комментарий!
-var2 := T xor F ИЭТО;
+var2 := T or F and ИЭТО;
 //Это тоже комментарий!?
+
+var1 % var2

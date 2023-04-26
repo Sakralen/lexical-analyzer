@@ -34,22 +34,23 @@ public class LexicalAnalyzer {
                 continue;
             }
 
-            boolean isComment = false;
-            for (String commentStr: cfg.commentChars) {
-                if (lines[i].startsWith(commentStr)) {
-                    commentedLines.put(i + 1, lines[i]);
-                    isComment = true;
-                    break;
-                }
-            }
+            // TODO: check comment escape for errors
+            tokenizedLines.put(i + 1, Stream.of(lines[i])
+                    .flatMap(line -> Stream.of(line.split("\\s+")))
+                    .takeWhile(this::isNotCommentStart)
+                    .flatMap(tokens -> Stream.of(tokens.split(cfg.lineDelimiter)))
+                    .toArray(String[]::new));
 
-            if (!isComment) {
-                tokenizedLines.put(i + 1, Stream.of(lines[i])
-                        .flatMap(line -> Stream.of(line.split("\\s+")))
-                        .flatMap(tokens -> Stream.of(tokens.split(cfg.lineDelimiter)))
-                        .toArray(String[]::new));
+        }
+    }
+
+    private boolean isNotCommentStart(String token) {
+        for (String commentStr : cfg.commentChars) {
+            if (token.startsWith(commentStr)) {
+                return false;
             }
         }
+        return true;
     }
 
     private void analyze() {
