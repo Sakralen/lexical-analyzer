@@ -17,6 +17,8 @@ public class LexicalAnalyzerApp {
         }
 
         LexicalAnalyzer analyzer = new LexicalAnalyzer(pathToFile, pathToJson);
-        //System.out.println(analyzer.getResult());
+
+
+        System.out.println(analyzer.getResults());
     }
 }
