@@ -28,13 +28,17 @@ public class OutputTable {
     }
 
     @Override
-    public String toString () {
-        StringBuilder sb = new StringBuilder();
-        results.forEach((key, value) -> sb
-                .append(String.format(formatter, key))
-                .append(" | ")
-                .append(String.format(formatter, value))
-                .append("\n"));
-        return sb.toString();
+    public String toString() {
+        if (results.size() != 0) {
+            StringBuilder sb = new StringBuilder();
+            results.forEach((key, value) -> sb
+                    .append(String.format(formatter, key))
+                    .append(" | ")
+                    .append(String.format(formatter, value))
+                    .append("\n"));
+            return sb.toString();
+        } else {
+            return "Таблица результатов пуста!";
+        }
     }
 }
