@@ -37,8 +37,8 @@ public class LexicalAnalyzer {
             // TODO: check comment escape for errors
             tokenizedLines.put(i + 1, Stream.of(lines[i])
                     .flatMap(line -> Stream.of(line.split("\\s+")))
-                    .takeWhile(this::isNotCommentStart)
                     .flatMap(tokens -> Stream.of(tokens.split(cfg.lineDelimiter)))
+                    .takeWhile(this::isNotCommentStart)
                     .toArray(String[]::new));
 
         }
@@ -46,7 +46,7 @@ public class LexicalAnalyzer {
 
     private boolean isNotCommentStart(String token) {
         for (String commentStr : cfg.commentChars) {
-            if (token.startsWith(commentStr)) {
+            if (token.equals(commentStr)) {
                 return false;
             }
         }

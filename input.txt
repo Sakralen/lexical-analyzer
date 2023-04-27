@@ -1,5 +1,5 @@
 var1  :=T and ILLEGALIDENTIFIER(var2 xor F) or not ((F));
-var3 xor var1 //A comment here?! and var4
+var3 xor var4//A comment here?! and var4
 %Это комментарий!
 var2 := T or F and ИЭТО;
 //Это тоже комментарий!?
