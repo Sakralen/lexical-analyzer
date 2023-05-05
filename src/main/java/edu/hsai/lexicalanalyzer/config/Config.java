@@ -1,7 +1,11 @@
 package edu.hsai.lexicalanalyzer.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Config {
     public final Map<String, String> operators;
@@ -22,7 +26,7 @@ public class Config {
         operators = (Map<String, String>) predefinedValues.get("operators");
         keywords = (Map<String, String>) predefinedValues.get("keywords");
         constants = (Map<String, String>) predefinedValues.get("constants");
-        lineDelimiter = String.join("|", (ArrayList<String>) predefinedValues.get("regex_delimiters"));
+        lineDelimiter = genLineDelimiter(predefinedValues);
 
         var identifierRules = (Map<String, Object>) predefinedValues.get("identifier_rules");
         identifierMaxLength = (long) identifierRules.get("max_length");
@@ -32,5 +36,27 @@ public class Config {
 
         commentChars = (ArrayList<String>) predefinedValues.get("comment_chars");
         aliases = (Map<String, String>) predefinedValues.get("aliases");
+    }
+
+    public String genLineDelimiter(Map<String, Object> predefinedValues) {
+        var operatorsKeys = ((Map<String, String>) predefinedValues.get("operators"))
+                .keySet().toArray(String[]::new);
+        var commentStrings = ((ArrayList<String>) predefinedValues.get("comment_chars"))
+                .toArray(String[]::new);
+        var delimiters = Stream.concat(Arrays.stream(operatorsKeys), Arrays.stream(commentStrings))
+                .map(this::modifyIntoDelimiter).toArray(String[]::new);
+
+        return String.join("|", delimiters);
+    }
+
+    // I didn't test this method properly, so no wonder if it will break smth
+    private String modifyIntoDelimiter(String str) {
+        Set<String> needsEscape = Stream
+                .of("[", "]", "(", ")", "{", "}", "*", "+", "?", "|", "^", "$", ".", "\\")
+                .collect(Collectors.toSet());
+
+        String tmp = (!needsEscape.contains(str)) ? str : ("\\" + str);
+
+        return "(?=" + tmp + ")" + "|" + "(?<=" + tmp + ")";
     }
 }

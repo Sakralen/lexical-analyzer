@@ -24,7 +24,6 @@ public class JsonHandler {
         if (!predefinedValues.containsKey("operators")
                 || !predefinedValues.containsKey("constants")
                 || !predefinedValues.containsKey("keywords")
-                || !predefinedValues.containsKey("regex_delimiters")
                 || !predefinedValues.containsKey("identifier_rules")
                 || !predefinedValues.containsKey("comment_chars")
                 || !predefinedValues.containsKey("aliases")) {
